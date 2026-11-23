@@ -689,7 +689,7 @@
     }
 
     function reveal(card, q, right) {
-      card.querySelector('.exp').innerHTML = `<b>${right ? '정답입니다' : '오답'}</b> · 정답 ${q.ox ? (q.ans ? 'O' : 'X') : q.short ? esc((q.accept || []).slice(0, 2).join(' / ')) : ('②③④⑤①'[q.ans] || '')} — ${fmt(q.exp || '')}`;
+      card.querySelector('.exp').innerHTML = `<b>${right ? '정답입니다' : '오답'}</b> · 정답 ${q.ox ? (q.ans ? 'O' : 'X') : q.short ? esc((q.accept || []).slice(0, 2).join(' / ')) : ('①②③④⑤'[q.ans] || '')} — ${fmt(q.exp || '')}`;
       card.querySelector('.exp').classList.remove('hidden');
     }
 
@@ -858,7 +858,7 @@
         const q = all[i];
         const card = pane.querySelector('[data-q="' + i + '"]');
         if (!card) return;
-        card.querySelector('.exp').innerHTML = `<b>정답</b> ${q.ox ? (q.ans ? 'O' : 'X') : q.short ? esc((q.accept || []).slice(0, 3).join(' / ')) : ('②③④⑤①'[q.ans] || '')} — ${fmt(q.exp || '')}`;
+        card.querySelector('.exp').innerHTML = `<b>정답</b> ${q.ox ? (q.ans ? 'O' : 'X') : q.short ? esc((q.accept || []).slice(0, 3).join(' / ')) : ('①②③④⑤'[q.ans] || '')} — ${fmt(q.exp || '')}`;
         card.querySelector('.exp').classList.remove('hidden');
         if (q.ox) card.querySelectorAll('[data-oxv]').forEach((b) => { if ((b.dataset.oxv === 'O') === !!q.ans) b.classList.add('right'); });
         else if (q.short) { const inp = card.querySelector('[data-short]'); if (inp) inp.value = (q.accept || [''])[0]; }
