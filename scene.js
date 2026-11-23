@@ -343,20 +343,20 @@
 
   /* ---------------------------------------------------------------- 10. pH 스펙트럼 */
   function phBar(s) {
-    var W = 320, H = 122, x0 = 8, w = 304, y = 40, cell = w / 14;
-    var cols = ['#e11d48', '#e11d48', '#f43f5e', '#f97316', '#fb923c', '#f59e0b', '#facc15', '#a3e635',
-      '#4ade80', '#34d399', '#22d3ee', '#38bdf8', '#60a5fa', '#818cf8'];
+    var W = 320, H = 122, x0 = 8, w = 304, y = 40, N = 15, cell = w / N;
+    var cols = ['#dc2626', '#dc2626', '#ef4444', '#f97316', '#fb923c', '#f59e0b', '#facc15', '#a3e635',
+      '#4ade80', '#34d399', '#22d3ee', '#38bdf8', '#60a5fa', '#818cf8', '#a78bfa'];
     var b = defs();
     b += tx(x0 + 30, 14, 9, 900, P.red, 'middle', '산성 ↑');
     b += tx(x0 + w / 2, 14, 9, 900, 'var(--muted)', 'middle', '중성 7');
     b += tx(x0 + w - 30, 14, 9, 900, P.purple, 'middle', '염기성 ↑');
-    for (var i = 0; i < 14; i++) {
-      b += '<rect x="' + (x0 + i * cell) + '" y="' + y + '" width="' + (cell + 0.6) + '" height="22" fill="' + cols[i] + '"></rect>';
-      b += tx(x0 + i * cell + cell / 2, y + 15, 8, 900, (i >= 5 && i <= 8) ? '#3f3f46' : '#ffffff', 'middle', i);
+    for (var i = 0; i < N; i++) {
+      b += '<rect x="' + (x0 + i * cell) + '" y="' + y + '" width="' + (cell + 0.4) + '" height="22" fill="' + cols[i] + '"></rect>';
+      b += tx(x0 + i * cell + cell / 2, y + 15, 7.5, 900, (i >= 5 && i <= 8) ? '#3f3f46' : '#ffffff', 'middle', i);
     }
     b += rect(x0, y, w, 22, 5, 'none', 'var(--border)', 1);
     (s.marks || []).forEach(function (m) {
-      var x = x0 + (Math.max(0, Math.min(13, m.v)) + 0.5) * cell;      b += '<circle cx="' + x + '" cy="' + (y + 11) + '" r="4.5" fill="#fff" stroke="var(--text)" stroke-width="1.5"></circle>';
+      var x = x0 + (Math.max(0, Math.min(14, m.v)) + 0.5) * cell;      b += '<circle cx="' + x + '" cy="' + (y + 11) + '" r="4.5" fill="#fff" stroke="var(--text)" stroke-width="1.5"></circle>';
       if (m.up) {
         b += line(x, y - 2, x, y - 10, 'var(--text)', 1, '2 2');
         b += tx(x, y - 14, 8.5, 900, 'var(--text)', 'middle', cut(m.l, 8));
