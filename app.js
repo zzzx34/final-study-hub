@@ -169,10 +169,10 @@
     renderSubject(sub);
     if (push) history.pushState({ v: 'subject', sid }, '');
   }
-  function goUnit(uid, push) {
+  function goUnit(uid, push, keepTab) {
     const hit = findUnit(uid);
     if (!hit) return goHome();
-    route = { view: 'unit', sid: hit.sub.id, uid, tab: state.lastTab || 'basic' };
+    route = { view: 'unit', sid: hit.sub.id, uid, tab: keepTab ? (state.lastTab || 'basic') : 'basic' };
     state.lastUnit = uid; save();
     showView('unit');
     setHeader(hit.unit.no + ' · ' + hit.unit.title, hit.sub.name, true);
@@ -393,8 +393,8 @@
     $('#unitPrevBtn').style.opacity = prev ? 1 : .45;
     $('#unitNextBtn').disabled = !next;
     $('#unitNextBtn').style.opacity = next ? 1 : .45;
-    $('#unitPrevBtn').onclick = () => prev && goUnit(prev.id, true);
-    $('#unitNextBtn').onclick = () => next && goUnit(next.id, true);
+    $('#unitPrevBtn').onclick = () => prev && goUnit(prev.id, true, true);
+    $('#unitNextBtn').onclick = () => next && goUnit(next.id, true, true);
     const doneBtn = $('#unitDoneBtn');
     doneBtn.textContent = isDone(u.id) ? '✓ 완료 취소' : '학습 완료';
     doneBtn.onclick = () => {
