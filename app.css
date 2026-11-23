@@ -31,6 +31,7 @@ html[data-theme="light"] {
   --kor: #7c3aed;
   --his: #d97706;
   --cyan: #0891b2;
+  --pink: #db2777;
 }
 html[data-theme="dark"] {
   color-scheme: dark;
@@ -59,6 +60,7 @@ html[data-theme="dark"] {
   --kor: #a78bfa;
   --his: #fbbf24;
   --cyan: #22d3ee;
+  --pink: #f472b6;
 }
 html[data-theme="mono"] {
   color-scheme: light;
@@ -87,6 +89,7 @@ html[data-theme="mono"] {
   --kor: #09090b;
   --his: #09090b;
   --cyan: #09090b;
+  --pink: #09090b;
 }
 
 *, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }

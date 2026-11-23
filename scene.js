@@ -13,7 +13,7 @@
     amber: 'var(--warn)', amberS: '#fef3c7',
     purple: 'var(--kor)', purpleS: '#ede9fe',
     cyan: 'var(--cyan)', cyanS: '#cffafe',
-    pink: 'var(--his)', pinkS: '#fce7f3',
+    pink: 'var(--pink)', pinkS: '#fce7f3',
     slate: 'var(--muted)'
   };
   var PAL = [P.blue, P.green, P.amber, P.purple, P.red, P.cyan, P.pink];
@@ -27,7 +27,7 @@
     '#7c3aed': 'var(--kor)', '#6366f1': 'var(--kor)',
     '#0891b2': 'var(--cyan)', '#0ea5e9': 'var(--cyan)',
     '#64748b': 'var(--muted)', '#475569': 'var(--sub)', '#6b7280': 'var(--muted)',
-    '#db2777': 'var(--his)'
+    '#db2777': 'var(--pink)'
   };
   function col(c) { return CMAP[String(c).toLowerCase()] || c; }
   function normObj(o) {
@@ -291,7 +291,7 @@
       var y = top + i * rowH;
       var mw = Math.max(3, (g.m / max) * maxW);
       var fw = Math.max(3, (g.f / max) * maxW);
-      b += tx(midX, y + 12, 8.5, 800, 'var(--muted)', 'middle', g.age);
+      b += tx(midX, y + 12, 9.5, 900, 'var(--sub)', 'middle', g.age);
       b += '<rect x="' + (midX - 20 - mw) + '" y="' + y + '" width="' + mw + '" height="16" rx="3" fill="' + P.blue + '" fill-opacity=".8"></rect>';
       b += '<rect x="' + (midX + 20) + '" y="' + y + '" width="' + fw + '" height="16" rx="3" fill="' + P.pink + '" fill-opacity=".8"></rect>';
       if (g.hot) {
