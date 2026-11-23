@@ -28,7 +28,7 @@
     <div class="wrap">
       <div class="tabbar hidden" id="unitTabs" role="tablist">
         <button type="button" data-tab="basic" class="on" role="tab">기초 개념</button>
-        <button type="button" data-tab="visual" role="tab">시각 도식</button>
+        <button type="button" data-tab="visual" role="tab"><i class="tab-dot"></i>시각 도식</button>
         <button type="button" data-tab="deep" role="tab">심화·함정</button>
         <button type="button" data-tab="quiz" role="tab">실전 퀴즈</button>
       </div>
@@ -59,15 +59,13 @@
       <div class="section-title"><h2>과목 선택</h2><span>4과목</span></div>
       <div class="subject-grid" id="subjectGrid"></div>
 
-      <div class="section-title"><h2>학습 팁</h2><span>시험 대비</span></div>
-      <div class="card">
-        <div class="small" style="line-height:1.75">
-          <b>① 도식 먼저, 문장 나중.</b> 각 소단원의 '시각 도식' 탭에서 구조를 먼저 그림으로 잡고, 그 위에 개념 문장을 얹으면 기억 유지가 훨씬 좋아집니다.<br>
-          <b>② 함정은 소리내어 확인.</b> '심화·함정' 탭의 빨간 박스는 실제 선지가 뒤집히는 지점입니다. OX로 스스로 검증하세요.<br>
-          <b>③ 퀴즈는 3회 반복.</b> 맞힌 문항도 다시 풀면 기억이 굳습니다. 점수는 기기에 저장됩니다.
-        </div>
-        <a class="btn btn-primary" style="margin-top:12px;width:100%" href="https://zzzx34.github.io/study-timetable/">🗓 시간표 플래너로 이동</a>
+      <div class="section-title"><h2>학습 팁</h2><span>3줄</span></div>
+      <div class="tip-row">
+        <div class="tip-chip"><span>🖼</span><b>도식 먼저</b><i>그림 → 문장 순서</i></div>
+        <div class="tip-chip"><span>❌</span><b>함정 확인</b><i>뒤집힌 선지 OX</i></div>
+        <div class="tip-chip"><span>🔁</span><b>퀴즈 3회</b><i>맞힌 문항도 반복</i></div>
       </div>
+      <a class="btn btn-primary" style="margin-top:10px;width:100%" href="https://zzzx34.github.io/study-timetable/">🗓 시간표 플래너로 이동</a>
       <div style="height:6px"></div>
     </section>
 
@@ -124,6 +122,7 @@
   <div class="toast" id="toast"></div>
 
   <script src="data/meta.js"></script>
+  <script src="data/visuals.js"></script>
   <script src="data/social.js"></script>
   <script src="data/science.js"></script>
   <script src="data/korean.js"></script>
@@ -132,6 +131,7 @@
   <script src="data/q-science.js"></script>
   <script src="data/q-korean.js"></script>
   <script src="data/q-history.js"></script>
+  <script src="scene.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

@@ -6,6 +6,7 @@
   'use strict';
 
   const SUBJECTS = window.HUB_SUBJECTS || [];
+  const UIMAP = window.HUB_UI || {};
   const STORE_KEY = 'finalStudyHub.v1';
   const $ = (s, r) => (r || document).querySelector(s);
   const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
@@ -298,45 +299,82 @@
   }
 
   /* ----------------------------- 소단원 렌더 ----------------------------- */
+  function uiOf(id) { return UIMAP[id] || null; }
+
+  function sceneHTML(v) {
+    if (!v || !window.HUB_SCENE) return '';
+    const svg = window.HUB_SCENE.render(v);
+    if (!svg) return '';
+    return '<div class="scene">' +
+      '<div class="sc-head"><span class="sc-t">' + esc(v.t || '') + '</span>' +
+      '<span class="sc-tag">' + esc(window.HUB_SCENE.tag(v.type)) + '</span></div>' +
+      '<div class="sc-body">' + svg + '</div>' +
+      (v.note ? '<button type="button" class="sc-note-btn" data-scn="1">💬 한 줄 해석</button><div class="sc-note">' + fmt(v.note) + '</div>' : '') +
+      '</div>';
+  }
+
+  function termShort(t, ui, i) {
+    if (ui && ui.keys && ui.keys[i]) return ui.keys[i];
+    const d = String(t.d || '').replace(/\*\*/g, '');
+    return { i: '•', s: d.split(/[.。]/)[0].slice(0, 24) };
+  }
+  function ptShort(u, ui, i) {
+    if (ui && ui.pts && ui.pts[i]) return ui.pts[i];
+    const p = String((u.points || [])[i] || '').replace(/\*\*/g, '');
+    return p.split(/[.。]/)[0].slice(0, 26);
+  }
+
   function renderUnit(sub, u) {
     const idx = sub.units.findIndex((x) => x.id === u.id);
+    const ui = uiOf(u.id);
+    const banner = ui && ui.banner && window.HUB_SCENE ? window.HUB_SCENE.render(ui.banner) : '';
     $('#unitHead').innerHTML = `
       <div class="row" style="gap:6px;flex-wrap:wrap">
-        <span class="pill" style="border-color:${sub.color};color:${sub.color}">${esc(sub.name)}</span>
+        <span class="pill" style="border-color:${sub.color};color:${sub.color};font-weight:900">${esc(sub.name)}</span>
         <span class="pill">${esc(u.no)}</span>
-        <span class="pill">시험 ${esc(sub.examLabel)} · ${ddayText(sub.examISO)}</span>
-        ${isDone(u.id) ? '<span class="pill" style="background:var(--ok);border-color:var(--ok);color:#fff">학습 완료</span>' : ''}
+        <span class="pill">${ddayText(sub.examISO)}</span>
+        ${isDone(u.id) ? '<span class="pill" style="background:var(--ok);border-color:var(--ok);color:#fff">완료</span>' : ''}
       </div>
-      <h1 style="margin-top:9px">${esc(u.title)}</h1>
-      ${u.lead ? `<div class="lead">${fmt(u.lead)}</div>` : ''}`;
+      <h1 style="margin-top:8px">${esc(u.title)}</h1>
+      ${ui && ui.form ? `<div class="formula"><span class="f-lbl">한 줄 공식</span><span class="f-v">${fmt(ui.form)}</span></div>` : ''}
+      ${banner ? `<div class="basic-hero">${banner}</div>` : ''}`;
 
-    // 기초
-    const basics = [];
-    if (u.terms && u.terms.length) {
-      basics.push(`<h3 class="blk">핵심 용어</h3><div class="term-grid">${u.terms.map((t) => `
-        <div class="term"><div class="t-name">${esc(t.t)}</div>
-          <div class="t-def">${fmt(t.d)}</div>
-          ${t.a ? `<div class="t-anal">${fmt(t.a)}</div>` : ''}</div>`).join('')}</div>`);
-    }
-    if (u.points && u.points.length) {
-      basics.push(`<h3 class="blk">이것만은 기억하자</h3><ul class="kp">${u.points.map((p) => `<li>${fmt(p)}</li>`).join('')}</ul>`);
-    }
-    if (u.basicsVisual) basics.push(`<h3 class="blk">한눈에 구조</h3>${renderVisual(u.basicsVisual)}`);
-    $('#tab-basic').innerHTML = basics.join('') || '<div class="empty">준비 중</div>';
+    // 기초 개념 — 초압축 스캔 카드
+    const keys = (u.terms || []).map((t, i) => {
+      const k = termShort(t, ui, i);
+      return `<button type="button" class="key" data-kx="${i}">
+        <span class="k-top"><span class="k-ic">${esc(k.i || '•')}</span><span class="k-name">${esc(t.t)}</span><span class="k-plus">+</span></span>
+        <span class="k-short">${esc(k.s)}</span>
+        <span class="k-more"><span class="k-def">${fmt(t.d)}</span>${t.a ? `<span class="k-ex">💡 ${fmt(t.a)}</span>` : ''}</span>
+      </button>`;
+    }).join('');
+    const pts = (u.points || []).map((p, i) =>
+      `<div class="pt"><span class="pt-n">${i + 1}</span><span>${esc(ptShort(u, ui, i))}</span></div>`).join('');
+    const fullPts = (u.points || []).map((p) => `<li>${fmt(p)}</li>`).join('');
+    $('#tab-basic').innerHTML =
+      `<div class="blk-head"><h3>핵심 용어</h3><span>탭하면 설명</span></div>
+       <div class="key-grid">${keys}</div>
+       <div class="blk-head"><h3>핵심 포인트</h3><span>${(u.points || []).length}줄</span></div>
+       <div class="pt-list">${pts}</div>
+       <button type="button" class="btn btn-ghost full" id="ptAllBtn">📄 원문 포인트 전체 보기</button>
+       <div class="pt-full hidden" id="ptFull"><ul class="kp">${fullPts}</ul></div>
+       <button type="button" class="vis-cta" id="goVisual"><span class="vc-ic">🖼</span><span class="grow" style="text-align:left"><b>시각 도식으로 한눈에</b><span class="vc-sub">그림 ${((ui && ui.scenes) || []).length}개 · 구조부터 잡기</span></span><span class="vc-ar">›</span></button>`;
 
-    // 시각
-    const vis = (u.visuals || []).map((v) => renderVisual(v)).join('');
+    // 시각 도식 — SVG 장면
+    const scenes = (ui && ui.scenes) || [];
+    const vis = scenes.length
+      ? scenes.map(sceneHTML).join('')
+      : (u.visuals || []).map((v) => renderVisual(v)).join('');
     $('#tab-visual').innerHTML = (vis || '<div class="empty">시각 자료 준비 중</div>') +
-      `<div class="card" style="margin-top:4px;background:var(--tile)"><div class="small sub" style="line-height:1.7">
-        <b>도식 활용법</b> — 그림을 덮고 스스로 다시 그려 보세요. 칸의 제목만 보고 내용을 말할 수 있으면 그 단원은 끝난 것입니다.</div></div>`;
+      '<div class="vis-hint">그림을 덮고 스스로 다시 그려 보세요</div>';
 
-    // 심화
+    // 심화·함정 — ❌ vs ⭕ 대비 칩
     const deep = (u.deep || []).map((d) => `
-      <div class="deep-item">
-        <div class="di-h"><span>🎯</span><span>${fmt(d.h)}</span></div>
-        <div class="di-b">${fmt(d.b)}</div>
-        ${d.trap ? `<div class="trap"><b>선지 함정</b> ${fmt(d.trap)}</div>` : ''}
-        ${d.tip ? `<div class="tip"><b>1등급 포인트</b> ${fmt(d.tip)}</div>` : ''}
+      <div class="deep-card">
+        <div class="dc-h"><span class="dc-n">🎯</span><span>${fmt(d.h)}</span></div>
+        ${d.trap ? `<div class="chip bad"><span class="ch-i">❌</span><span><b>흔한 오답</b> ${fmt(d.trap)}</span></div>` : ''}
+        ${d.tip ? `<div class="chip good"><span class="ch-i">⭕</span><span><b>시험 정답</b> ${fmt(d.tip)}</span></div>` : ''}
+        ${d.b ? `<button type="button" class="dc-more-btn" data-dc="1">왜 그런가? +</button><div class="dc-b">${fmt(d.b)}</div>` : ''}
       </div>`).join('');
     $('#tab-deep').innerHTML = deep || '<div class="empty">준비 중</div>';
 
@@ -360,6 +398,16 @@
       if (isDone(u.id)) { delete state.done[u.id]; toast('완료를 취소했어요'); }
       else { state.done[u.id] = Date.now(); toast('소단원 학습 완료! 🎉'); }
       save(); renderUnit(sub, u);
+    };
+
+    const pv = $('#goVisual');
+    if (pv) pv.onclick = () => setTab('visual');
+    const pa = $('#ptAllBtn');
+    if (pa) pa.onclick = () => {
+      const b = $('#ptFull');
+      const open = b.classList.contains('hidden');
+      b.classList.toggle('hidden', !open);
+      pa.textContent = open ? '📄 원문 포인트 접기' : '📄 원문 포인트 전체 보기';
     };
 
     bindQuiz(u);
@@ -856,6 +904,22 @@
 
   /* ----------------------------- 이벤트 ----------------------------- */
   document.addEventListener('click', (e) => {
+    const key = e.target.closest('[data-kx]');
+    if (key) { if (e.target.closest('.k-more')) return; key.classList.toggle('open'); return; }
+    const dcm = e.target.closest('[data-dc]');
+    if (dcm) {
+      const card = dcm.closest('.deep-card');
+      card.classList.toggle('open');
+      dcm.textContent = card.classList.contains('open') ? '설명 접기 −' : '왜 그런가? +';
+      return;
+    }
+    const scn = e.target.closest('[data-scn]');
+    if (scn) {
+      const sc = scn.closest('.scene');
+      sc.classList.toggle('open');
+      scn.textContent = sc.classList.contains('open') ? '해석 접기' : '💬 한 줄 해석';
+      return;
+    }
     const step = e.target.closest('[data-flow-step]');
     if (step) { step.classList.toggle('open'); return; }
     const gl = e.target.closest('[data-gloss]');
