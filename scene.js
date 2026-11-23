@@ -7,16 +7,39 @@
 
   var UID = 0;
   var P = {
-    blue: '#2563eb', blueS: '#dbeafe',
-    red: '#dc2626', redS: '#fee2e2',
-    green: '#059669', greenS: '#d1fae5',
-    amber: '#d97706', amberS: '#fef3c7',
-    purple: '#7c3aed', purpleS: '#ede9fe',
-    cyan: '#0891b2', cyanS: '#cffafe',
-    pink: '#db2777', pinkS: '#fce7f3',
-    slate: '#64748b'
+    blue: 'var(--accent)', blueS: '#dbeafe',
+    red: 'var(--bad)', redS: '#fee2e2',
+    green: 'var(--ok)', greenS: '#d1fae5',
+    amber: 'var(--warn)', amberS: '#fef3c7',
+    purple: 'var(--kor)', purpleS: '#ede9fe',
+    cyan: 'var(--cyan)', cyanS: '#cffafe',
+    pink: 'var(--his)', pinkS: '#fce7f3',
+    slate: 'var(--muted)'
   };
   var PAL = [P.blue, P.green, P.amber, P.purple, P.red, P.cyan, P.pink];
+
+  /* 데이터의 대표 색상을 테마 대응 CSS 변수로 치환 (다크 모드 대비 확보) */
+  var CMAP = {
+    '#2563eb': 'var(--accent)', '#1d4ed8': 'var(--accent)',
+    '#059669': 'var(--ok)', '#10b981': 'var(--ok)',
+    '#dc2626': 'var(--bad)', '#e11d48': 'var(--bad)',
+    '#d97706': 'var(--warn)', '#f59e0b': 'var(--warn)', '#eab308': 'var(--warn)',
+    '#7c3aed': 'var(--kor)', '#6366f1': 'var(--kor)',
+    '#0891b2': 'var(--cyan)', '#0ea5e9': 'var(--cyan)',
+    '#64748b': 'var(--muted)', '#475569': 'var(--sub)', '#6b7280': 'var(--muted)',
+    '#db2777': 'var(--his)'
+  };
+  function col(c) { return CMAP[String(c).toLowerCase()] || c; }
+  function normObj(o) {
+    if (!o || typeof o !== 'object') return o;
+    if (Array.isArray(o)) return o.map(normObj);
+    var out = {};
+    for (var k in o) {
+      if (!Object.prototype.hasOwnProperty.call(o, k)) continue;
+      out[k] = (k === 'c' && typeof o[k] === 'string') ? col(o[k]) : normObj(o[k]);
+    }
+    return out;
+  }
 
   function esc(s) {
     return String(s == null ? '' : s)
@@ -798,6 +821,7 @@
 
   function render(s) {
     if (!s) return '';
+    s = normObj(s);
     try {
       switch (s.type) {
         case 'banner': return banner(s);
