@@ -673,3 +673,8 @@ html[data-theme="mono"] .formula { background: var(--tile); }
 @media (max-width: 359px) {
   .key-grid { grid-template-columns: 1fr; }
 }
+
+/* 헤더 제목 1줄 고정 · 비기초 탭에서 머리말 압축 */
+.header-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.unit-head.compact .formula, .unit-head.compact .basic-hero { display: none; }
+.unit-head.compact h1 { font-size: 17px; }

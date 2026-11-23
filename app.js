@@ -131,8 +131,7 @@
   let route = { view: 'home' };
   function setHeader(title, sub, showBack) {
     $('#headerTitle').textContent = title;
-    $('#headerSub').textContent = sub || '';
-    $('#backBtn').hidden = !showBack;
+    $('#headerSub').textContent = sub || '';    $('#backBtn').hidden = !showBack;
     $('#unitTabs').classList.toggle('hidden', route.view !== 'unit');
     const ne = nearestExam();
     $('#headerDday').textContent = ne ? ddayText(ne.s.examISO) : 'D-DAY';
@@ -175,7 +174,8 @@
     route = { view: 'unit', sid: hit.sub.id, uid, tab: keepTab ? (state.lastTab || 'basic') : 'basic' };
     state.lastUnit = uid; save();
     showView('unit');
-    setHeader(hit.unit.no + ' · ' + hit.unit.title, hit.sub.name, true);
+    const tail = hit.unit.title.length > 13 ? hit.unit.title.slice(0, 13) + '…' : hit.unit.title;
+    setHeader(hit.unit.no + ' · ' + tail, hit.sub.name, true);
     renderUnit(hit.sub, hit.unit);
     if (push) history.pushState({ v: 'unit', uid }, '');
   }
@@ -185,6 +185,7 @@
     state.lastTab = tab; save();
     $$('#unitTabs button').forEach((b) => b.classList.toggle('on', b.dataset.tab === tab));
     ['basic', 'visual', 'deep', 'quiz'].forEach((t) => $('#tab-' + t).classList.toggle('hidden', t !== tab));
+    $('#unitHead').classList.toggle('compact', tab !== 'basic');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -386,6 +387,7 @@
 
     $$('#unitTabs button').forEach((b) => b.classList.toggle('on', b.dataset.tab === (route.tab || 'basic')));
     ['basic', 'visual', 'deep', 'quiz'].forEach((t) => $('#tab-' + t).classList.toggle('hidden', t !== (route.tab || 'basic')));
+    $('#unitHead').classList.toggle('compact', (route.tab || 'basic') !== 'basic');
 
     // 이전/다음
     const prev = sub.units[idx - 1], next = sub.units[idx + 1];
