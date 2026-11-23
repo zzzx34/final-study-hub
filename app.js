@@ -348,13 +348,16 @@
         <span class="k-more"><span class="k-def">${fmt(t.d)}</span>${t.a ? `<span class="k-ex">💡 ${fmt(t.a)}</span>` : ''}</span>
       </button>`;
     }).join('');
-    const pts = (u.points || []).map((p, i) =>
-      `<div class="pt"><span class="pt-n">${i + 1}</span><span>${esc(ptShort(u, ui, i))}</span></div>`).join('');
+    const ptLines = (ui && ui.pts && ui.pts.length)
+      ? ui.pts
+      : (u.points || []).slice(0, 3).map((p, i) => ptShort(u, ui, i));
+    const pts = ptLines.map((s, i) =>
+      `<div class="pt"><span class="pt-n">${i + 1}</span><span>${esc(s)}</span></div>`).join('');
     const fullPts = (u.points || []).map((p) => `<li>${fmt(p)}</li>`).join('');
     $('#tab-basic').innerHTML =
       `<div class="blk-head"><h3>핵심 용어</h3><span>탭하면 설명</span></div>
        <div class="key-grid">${keys}</div>
-       <div class="blk-head"><h3>핵심 포인트</h3><span>${(u.points || []).length}줄</span></div>
+       <div class="blk-head"><h3>핵심 포인트</h3><span>${ptLines.length}줄 요약</span></div>
        <div class="pt-list">${pts}</div>
        <button type="button" class="btn btn-ghost full" id="ptAllBtn">📄 원문 포인트 전체 보기</button>
        <div class="pt-full hidden" id="ptFull"><ul class="kp">${fullPts}</ul></div>
