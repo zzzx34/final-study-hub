@@ -217,9 +217,11 @@
     });
     /* 교환 화살표 */
     b += '<path d="M140 84 C152 76 168 76 180 84" fill="none" stroke="' + P.amber + '" stroke-width="2" marker-end="url(#ah' + UID + ')"></path>';
-    b += tx(160, 70, 8.5, 900, P.amber, 'middle', s.outLabel || '수출 →');
-    b += '<path d="M180 136 C168 144 152 144 140 136" fill="none" stroke="' + P.amber + '" stroke-width="2" marker-end="url(#ah' + UID + ')"></path>';
-    b += tx(160, 158, 8.5, 900, P.amber, 'middle', s.inLabel || '← 수입');
+    b += rect(126, 52, 68, 15, 7, 'var(--card)', 'var(--border)', 1);
+    b += tx(160, 63, 8.5, 900, P.amber, 'middle', s.outLabel || '수출 →');
+    b += '<path d="M180 138 C168 146 152 146 140 138" fill="none" stroke="' + P.amber + '" stroke-width="2" marker-end="url(#ah' + UID + ')"></path>';
+    b += rect(126, 158, 68, 15, 7, 'var(--card)', 'var(--border)', 1);
+    b += tx(160, 169, 8.5, 900, P.amber, 'middle', s.inLabel || '← 수입');
     b += '<circle cx="160" cy="110" r="15" fill="var(--card)" stroke="var(--border)"></circle>';
     b += tx(160, 114, 12, 700, 'var(--text)', 'middle', s.center || '🤝');
     return wrap(W, H, b);
@@ -341,30 +343,27 @@
 
   /* ---------------------------------------------------------------- 10. pH 스펙트럼 */
   function phBar(s) {
-    var W = 320, H = 150, x0 = 10, w = 300, y = 42, cell = w / 14;
+    var W = 320, H = 122, x0 = 8, w = 304, y = 40, cell = w / 14;
     var cols = ['#e11d48', '#e11d48', '#f43f5e', '#f97316', '#fb923c', '#f59e0b', '#facc15', '#a3e635',
-      '#4ade80', '#34d399', '#22d3ee', '#38bdf8', '#60a5fa', '#818cf8', '#a78bfa'];
+      '#4ade80', '#34d399', '#22d3ee', '#38bdf8', '#60a5fa', '#818cf8'];
     var b = defs();
-    b += tx(x0 + 26, 14, 9, 900, P.red, 'middle', '산성 ↑');
+    b += tx(x0 + 30, 14, 9, 900, P.red, 'middle', '산성 ↑');
     b += tx(x0 + w / 2, 14, 9, 900, 'var(--muted)', 'middle', '중성 7');
-    b += tx(x0 + w - 26, 14, 9, 900, P.purple, 'middle', '염기성 ↑');
+    b += tx(x0 + w - 30, 14, 9, 900, P.purple, 'middle', '염기성 ↑');
     for (var i = 0; i < 14; i++) {
       b += '<rect x="' + (x0 + i * cell) + '" y="' + y + '" width="' + (cell + 0.6) + '" height="22" fill="' + cols[i] + '"></rect>';
-      b += tx(x0 + i * cell + cell / 2, y + 36, 7.5, 800, 'var(--muted)', 'middle', i);
+      b += tx(x0 + i * cell + cell / 2, y + 15, 8, 900, (i >= 5 && i <= 8) ? '#3f3f46' : '#ffffff', 'middle', i);
     }
-    b += tx(x0 + 14 * cell - 4, y + 36, 7.5, 800, 'var(--muted)', 'middle', '14');
     b += rect(x0, y, w, 22, 5, 'none', 'var(--border)', 1);
     (s.marks || []).forEach(function (m) {
-      var x = x0 + (Math.max(0, Math.min(14, m.v)) + 0.5) * cell;
-      b += '<circle cx="' + x + '" cy="' + (y + 11) + '" r="4.5" fill="#fff" stroke="var(--text)" stroke-width="1.5"></circle>';
+      var x = x0 + (Math.max(0, Math.min(13, m.v)) + 0.5) * cell;      b += '<circle cx="' + x + '" cy="' + (y + 11) + '" r="4.5" fill="#fff" stroke="var(--text)" stroke-width="1.5"></circle>';
       if (m.up) {
         b += line(x, y - 2, x, y - 10, 'var(--text)', 1, '2 2');
         b += tx(x, y - 14, 8.5, 900, 'var(--text)', 'middle', cut(m.l, 8));
-        if (m.d) b += tx(x, y - 6, 7, 700, 'var(--muted)', 'middle', cut(m.d, 5));
       } else {
-        b += line(x, y + 24, x, y + 46, 'var(--text)', 1, '2 2');
-        b += tx(x, y + 58, 8.5, 900, 'var(--text)', 'middle', cut(m.l, 8));
-        if (m.d) b += tx(x, y + 68, 7, 700, 'var(--muted)', 'middle', cut(m.d, 5));
+        b += line(x, y + 24, x, y + 34, 'var(--text)', 1, '2 2');
+        b += tx(x, y + 46, 8.5, 900, 'var(--text)', 'middle', cut(m.l, 8));
+        if (m.d) b += tx(x, y + 57, 7, 700, 'var(--muted)', 'middle', cut(m.d, 5));
       }
     });
     return wrap(W, H, b);
@@ -387,13 +386,13 @@
     /* 곡선 */
     b += '<path d="M' + (x0 + 6) + ' ' + yR + ' C' + (x0 + 52) + ' ' + yR + ' ' + (x0 + 74) + ' ' + yPeak + ' 160 ' + yPeak +
       ' C' + (230) + ' ' + yPeak + ' ' + (240) + ' ' + yP + ' ' + (x1 - 8) + ' ' + yP + '" fill="none" stroke="' + (s.endothermic ? P.purple : P.red) + '" stroke-width="2.6" stroke-linecap="round"></path>';
-    b += tx(60, yR - 7, 9, 900, P.blue, 'middle', '반응물');
+    b += tx(48, yR - 9, 9, 900, P.blue, 'start', '반응물');
     b += tx(252, yP + (s.endothermic ? 14 : 15), 9, 900, P.green, 'middle', '생성물');
     /* 활성화 에너지 */
     var xa = 160;
     b += line(xa, yPeak - 4, xa, yR, P.amber, 1.2, '3 2');
     b += line(xa - 4, yPeak - 4, xa + 4, yPeak - 4, P.amber, 1.2);
-    b += tx(xa + 5, (yPeak + yR) / 2, 8.5, 900, P.amber, 'start', '활성화 E');
+    b += tx(xa + 7, (yPeak + yR) / 2, 8.5, 900, P.amber, 'start', '활성화 E');
     /* 반응열 화살표 */
     var xd = 298;
     b += line(xd, yR, xd, yP, s.endothermic ? P.purple : P.red, 2, null);
@@ -523,7 +522,7 @@
     b += '<path d="M228 152 L200 152" stroke="' + P.green + '" stroke-width="2" marker-end="url(#ah' + UID + ')"></path>';
     b += tx(160, 142, 8.5, 900, P.green, 'middle', '자석 ↔ 코일');
     /* 전류·검류계 */
-    b += '<path d="M160 116 L160 174 L208 174" fill="none" stroke="' + P.slate + '" stroke-width="1.6"></path>';
+    b += '<path d="M200 100 L208 174 L208 174" fill="none" stroke="' + P.slate + '" stroke-width="1.6"></path>';
     b += '<circle cx="220" cy="174" r="12" fill="var(--card)" stroke="' + P.slate + '" stroke-width="1.4"></circle>';
     b += tx(220, 178, 9, 900, P.slate, 'middle', 'A');
     b += tx(160, 198, 8.5, 900, P.blue, 'middle', s.label || '자기장 변화 → 유도 전류');
@@ -576,15 +575,15 @@
     var W = 320, rowH = 50, top = 24;
     var H = top + rows.length * rowH + 4;
     var b = defs();
-    b += tx(78, 14, 9, 900, P.purple, 'middle', s.leftLabel || '중세국어');
-    b += tx(242, 14, 9, 900, P.green, 'middle', s.rightLabel || '현대어');
+    b += tx(90, 14, 9, 900, P.purple, 'middle', s.leftLabel || '중세국어');
+    b += tx(250, 14, 9, 900, P.green, 'middle', s.rightLabel || '현대어');
     rows.forEach(function (r, i) {
       var y = top + i * rowH;
-      b += rect(8, y, 140, 30, 9, P.purple, P.purple, 1, 0.09);
-      b += tx(78, y + 19, 10.5, 900, 'var(--text)', 'middle', cut(r.a, 11));
-      b += '<path d="M152 ' + (y + 15) + ' L168 ' + (y + 15) + '" stroke="' + P.amber + '" stroke-width="1.8" marker-end="url(#ah' + UID + ')"></path>';
-      b += rect(172, y, 140, 30, 9, P.green, P.green, 1, 0.09);
-      b += tx(242, y + 19, 10, 900, 'var(--text)', 'middle', cut(r.b, 13));
+      b += rect(6, y, 168, 30, 9, P.purple, P.purple, 1, 0.09);
+      b += tx(90, y + 19, 10.5, 900, 'var(--text)', 'middle', cut(r.a, 14));
+      b += '<path d="M176 ' + (y + 15) + ' L188 ' + (y + 15) + '" stroke="' + P.amber + '" stroke-width="1.8" marker-end="url(#ah' + UID + ')"></path>';
+      b += rect(192, y, 122, 30, 9, P.green, P.green, 1, 0.09);
+      b += tx(253, y + 19, 9.5, 900, 'var(--text)', 'middle', cut(r.b, 11));
       if (r.why) b += tx(160, y + 42, 8, 800, 'var(--muted)', 'middle', cut(r.why, 26));
     });
     return wrap(W, H, b);
@@ -648,19 +647,19 @@
 
   /* ---------------------------------------------------------------- 22. 2×2 매트릭스 */
   function matrix(s) {
-    var W = 320, H = 250, x0 = 44, x1 = 306, y0 = 26, y1 = 194;
+    var W = 320, H = 246, x0 = 44, x1 = 306, y0 = 50, y1 = 196;
     var b = defs();
     var midX = (x0 + x1) / 2, midY = (y0 + y1) / 2;
     b += rect(x0, y0, x1 - x0, y1 - y0, 10, 'var(--tile)', 'var(--border)', 1, 1);
     b += line(midX, y0, midX, y1, 'var(--grid)', 1.2, '3 3');
     b += line(x0, midY, x1, midY, 'var(--grid)', 1.2, '3 3');
     var q = s.q || ['', '', '', ''];
-    b += tx((x0 + midX) / 2, y0 + 14, 8.5, 900, 'var(--muted)', 'middle', cut(q[0], 9));
-    b += tx((midX + x1) / 2, y0 + 14, 8.5, 900, 'var(--muted)', 'middle', cut(q[1], 9));
-    b += tx((x0 + midX) / 2, y1 - 7, 8.5, 900, 'var(--muted)', 'middle', cut(q[2], 9));
-    b += tx((midX + x1) / 2, y1 - 7, 8.5, 900, 'var(--muted)', 'middle', cut(q[3], 9));
-    b += tx(x1, y1 + 20, 8.5, 900, 'var(--sub)', 'end', (s.xlab || '') + ' →');
-    b += tx(x0 - 6, y0 - 12, 8.5, 900, 'var(--sub)', 'start', '↑ ' + (s.ylab || ''));
+    b += tx((x0 + midX) / 2, y0 - 8, 8.5, 900, 'var(--muted)', 'middle', cut(q[0], 9));
+    b += tx((midX + x1) / 2, y0 - 8, 8.5, 900, 'var(--muted)', 'middle', cut(q[1], 9));
+    b += tx((x0 + midX) / 2, y1 + 16, 8.5, 900, 'var(--muted)', 'middle', cut(q[2], 9));
+    b += tx((midX + x1) / 2, y1 + 16, 8.5, 900, 'var(--muted)', 'middle', cut(q[3], 9));
+    b += tx(x0 - 6, y1 + 32, 8.5, 900, 'var(--sub)', 'start', (s.xlab || '') + ' →');
+    b += tx(x0 - 6, y0 - 30, 8.5, 900, 'var(--sub)', 'start', '↑ ' + (s.ylab || ''));
     var cols = [P.blue, P.green, P.amber, P.purple];
     var placed = [];
     var clamp = function (v) { return Math.max(0, Math.min(1, v == null ? 0.5 : v)); };
@@ -743,7 +742,7 @@
     b += tx(44, 62, 17, 700, P.amber, 'middle', '☀️');
     b += tx(44, 92, 8.5, 900, 'var(--muted)', 'middle', '입사 100');
     for (var i = 0; i < 3; i++) {
-      b += '<path d="M72 ' + (44 + i * 12) + ' L108 ' + (44 + i * 12) + '" stroke="' + P.amber + '" stroke-width="2" marker-end="url(#ah' + UID + ')"></path>';
+      b += '<path d="M72 ' + (44 + i * 12) + ' L148 ' + (44 + i * 12) + '" stroke="' + P.amber + '" stroke-width="2" marker-end="url(#ah' + UID + ')"></path>';
     }
     /* 지구 */
     b += '<circle cx="206" cy="104" r="41" fill="' + P.blue + '" fill-opacity=".15" stroke="' + P.blue + '" stroke-width="1.6"></circle>';
