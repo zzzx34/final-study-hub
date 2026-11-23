@@ -651,6 +651,12 @@
         set.add(idx);
         state.wrong[u.id] = Array.from(set);
         save();
+        const wt = document.querySelector('#wrongOnlyBtn');
+        if (wt) {
+          const n = (state.wrong[u.id] || []).length;
+          wt.disabled = !n;
+          wt.textContent = '오답만 다시 풀기' + (n ? ' (' + n + ')' : '');
+        }
       }
       updateProgressBar();
       if (visibleIdx().every((i) => sess.answered[i])) finish();
