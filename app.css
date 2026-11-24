@@ -734,3 +734,6 @@ html[data-theme="mono"] .formula { background: var(--tile); }
   nav.bottom, .toast { display: none !important; }
   body { padding-bottom: 0; }
 }
+
+/* 기적패스 자료 출처 표기 */
+.src-note{display:inline-flex;align-items:center;gap:4px;margin-top:7px;padding:3px 8px;border-radius:999px;background:var(--tile);border:1px solid var(--border);font-weight:800;letter-spacing:-.01em}

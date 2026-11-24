@@ -346,7 +346,8 @@
       </div>
       <h1 style="margin-top:8px">${esc(u.title)}</h1>
       ${ui && ui.form ? `<div class="formula"><span class="f-lbl">한 줄 공식</span><span class="f-v">${fmt(ui.form)}</span></div>` : ''}
-      ${banner ? `<div class="basic-hero">${banner}</div>` : ''}`;
+      ${banner ? `<div class="basic-hero">${banner}</div>` : ''}
+      ${u.srcNote ? `<div class="tiny muted src-note">📘 ${esc(u.srcNote)}</div>` : ''}`;
 
     // 기초 개념 — 초압축 스캔 카드
     const keys = (u.terms || []).map((t, i) => {

@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+validate.js
+validate.py
+tools_jsdata.py
