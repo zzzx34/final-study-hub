@@ -16,8 +16,8 @@ html[data-theme="light"] {
   --accent: #2563eb;
   --accent-soft: #eff6ff;
   --accent-text: #1d4ed8;
-  --header-bg: rgba(255, 255, 255, 0.92);
-  --nav-bg: rgba(255, 255, 255, 0.96);
+  --header-bg: #ffffff;
+  --nav-bg: #ffffff;
   --input-bg: #f8fafc;
   --seg-bg: #e2e8f0;
   --seg-active: #ffffff;
@@ -45,8 +45,8 @@ html[data-theme="dark"] {
   --accent: #3b82f6;
   --accent-soft: rgba(59, 130, 246, 0.16);
   --accent-text: #93c5fd;
-  --header-bg: rgba(21, 25, 35, 0.92);
-  --nav-bg: rgba(21, 25, 35, 0.96);
+  --header-bg: #151923;
+  --nav-bg: #151923;
   --input-bg: #0f131c;
   --seg-bg: #1e2433;
   --seg-active: #2d364d;
@@ -74,8 +74,8 @@ html[data-theme="mono"] {
   --accent: #09090b;
   --accent-soft: #f4f4f5;
   --accent-text: #09090b;
-  --header-bg: rgba(255, 255, 255, 0.98);
-  --nav-bg: rgba(255, 255, 255, 0.98);
+  --header-bg: #ffffff;
+  --nav-bg: #ffffff;
   --input-bg: #ffffff;
   --seg-bg: #e4e4e7;
   --seg-active: #09090b;
@@ -97,10 +97,24 @@ html, body {
   margin: 0; padding: 0;
   background: var(--bg); color: var(--text);
   font-family: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-  word-break: keep-all; overflow-wrap: break-word; overflow-x: hidden;
+  word-break: keep-all; overflow-wrap: break-word;
+  /* overflow-x:hidden 은 iOS 사파리에서 body 를 스크롤 컨테이너로 만들어
+     sticky 헤더를 스크롤과 함께 사라지게 한다. clip 은 스크롤 컨테이너를
+     만들지 않으면서 가로 넘침만 잘라 sticky 를 그대로 유지한다. */
+  overflow-x: clip;
   -webkit-font-smoothing: antialiased;
 }
-body { padding-bottom: calc(104px + env(safe-area-inset-bottom)); }
+@supports not (overflow: clip) {
+  html, body { overflow-x: hidden; }
+}
+:root {
+  /* 하단 탭바 높이(세이프에어리어 제외). 본문 여백 계산에 함께 쓴다. */
+  --nav-h: 56px;
+  --nav-clearance: 30px;
+}
+body {
+  padding-bottom: calc(var(--nav-h) + var(--nav-clearance) + env(safe-area-inset-bottom, 0px));
+}
 h1, h2, h3, h4, p, ul, ol { margin: 0; }
 a { color: inherit; text-decoration: none; }
 button { font-family: inherit; cursor: pointer; }
@@ -110,12 +124,14 @@ button { font-family: inherit; cursor: pointer; }
 /* ---------- layout ---------- */
 .wrap { max-width: 720px; margin: 0 auto; padding: 0 14px; }
 header.app-header {
-  position: sticky; top: 0; z-index: 40;
+  /* iOS 사파리에서 sticky 가 확실히 동작하도록 -webkit-sticky 도 함께 지정하고,
+     backdrop-filter 는 상단에서 검게 그려지는 문제가 있어 불투명 배경으로 대체한다. */
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0; z-index: 40;
   background: var(--header-bg);
-  backdrop-filter: saturate(180%) blur(14px);
-  -webkit-backdrop-filter: saturate(180%) blur(14px);
   border-bottom: 1px solid var(--border);
-  padding-top: env(safe-area-inset-top);
+  padding-top: env(safe-area-inset-top, 0px);
 }
 .header-row { display: flex; align-items: center; gap: 8px; height: 54px; }
 .header-title { font-size: 16px; font-weight: 900; letter-spacing: -0.02em; }
@@ -226,10 +242,11 @@ html[data-theme="mono"] .hero { background: #09090b; }
 .unit-check.done { background: var(--ok); border-color: var(--ok); color: #fff; }
 
 /* tabs */
+/* 헤더 안쪽 두 번째 줄이므로 자체 sticky 는 두지 않는다(중첩 sticky 는 iOS 에서 어긋난다). */
 .tabbar {
-  position: sticky; top: calc(54px + env(safe-area-inset-top)); z-index: 30;
+  position: static;
   display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px;
-  background: var(--header-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  background: var(--header-bg);
   padding: 6px 0 8px; border-bottom: 1px solid var(--border);
 }
 .tabbar button {
@@ -449,23 +466,26 @@ table.cmp td em { font-style: normal; font-weight: 900; color: var(--accent-text
 /* bottom nav */
 nav.bottom {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 45;
-  background: var(--nav-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  background: var(--nav-bg);
   border-top: 1px solid var(--border);
-  padding-bottom: env(safe-area-inset-bottom);
+  height: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
   display: grid; grid-template-columns: repeat(3, 1fr);
+  align-items: stretch;
+  box-shadow: 0 -1px 0 rgba(15, 23, 42, .04);
 }
 nav.bottom button {
-  border: 0; background: transparent; padding: 9px 0 8px; display: grid; gap: 2px; justify-items: center;
+  border: 0; background: transparent; padding: 6px 0; display: grid; gap: 2px; justify-items: center; align-content: center;
   color: var(--muted); font-size: 10px; font-weight: 900;
 }
 nav.bottom button .ico { font-size: 17px; line-height: 1; }
 nav.bottom button.on { color: var(--accent-text); }
-nav.bottom a { padding: 9px 0 8px; display: grid; gap: 2px; justify-items: center; color: var(--muted); font-size: 10px; font-weight: 900; }
+nav.bottom a { padding: 6px 0; display: grid; gap: 2px; justify-items: center; align-content: center; color: var(--muted); font-size: 10px; font-weight: 900; }
 nav.bottom a .ico { font-size: 17px; line-height: 1; }
 
 /* toast */
 .toast {
-  position: fixed; left: 50%; bottom: calc(84px + env(safe-area-inset-bottom)); transform: translate(-50%, 8px);
+  position: fixed; left: 50%; bottom: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px) + 14px); transform: translate(-50%, 8px);
   background: var(--text); color: var(--bg); font-size: 11.5px; font-weight: 800;
   padding: 9px 14px; border-radius: 999px; opacity: 0; pointer-events: none; transition: all .22s ease; z-index: 60;
   max-width: 84vw; text-align: center;
@@ -684,3 +704,31 @@ html[data-theme="mono"] .formula { background: var(--tile); }
 .header-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .unit-head.compact .formula, .unit-head.compact .basic-hero { display: none; }
 .unit-head.compact h1 { font-size: 17px; }
+
+/* ==========================================================================
+   아이패드 가로/세로 · 데스크톱 대응 (상단 헤더 고정, 하단 탭바 본문 비침범)
+   - 하단 탭바는 세이프에어리어만큼만 아래로 늘어나고, 본문 하단 여백은
+     --nav-h + --nav-clearance + safe-area 로 미리 확보한다.
+   - 가로가 넓은 기기에서는 탭바를 본문 폭(720px)에 맞춰 가운데로 모은다.
+   ========================================================================== */
+@media (min-width: 760px) {
+  nav.bottom {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    width: 720px;
+    max-width: calc(100% - 24px);
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    border-radius: 16px 16px 0 0;
+    box-shadow: 0 -8px 26px rgba(15, 23, 42, 0.10);
+  }
+  .header-row { height: 58px; }
+}
+
+/* 인쇄 시 고정 요소 제거 */
+@media print {
+  header.app-header { position: static; }
+  nav.bottom, .toast { display: none !important; }
+  body { padding-bottom: 0; }
+}

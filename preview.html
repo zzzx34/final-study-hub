@@ -4,24 +4,21 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
-<title>모바일 미리보기 · 375 / 390</title>
+<title>기기별 미리보기 · 375 / 390 / 아이패드</title>
 <style>
   body{margin:0;background:#e5e7eb;display:flex;flex-wrap:wrap;gap:18px;padding:18px;font-family:system-ui,sans-serif;align-items:flex-start}
   .cap{font-size:12px;font-weight:800;color:#334155;margin:0 0 6px 4px}
   .phone{background:#fff;border-radius:26px;overflow:hidden;box-shadow:0 12px 32px rgba(15,23,42,.18);border:1px solid #cbd5e1}
-  iframe{border:0;display:block;background:#fff}
+  .ipad{background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 12px 32px rgba(15,23,42,.18);border:1px solid #cbd5e1}
+  .ipad.wide{flex:1 1 1180px;max-width:1180px}
+  iframe{border:0;display:block;background:#fff;width:100%}
 </style>
 </head>
 <body>
-  <div><p class="cap">iPhone SE · 375 × 812</p><div class="phone"><iframe src="./index.html" width="375" height="812" title="375 미리보기"></iframe></div></div>
-  <div><p class="cap">iPhone 15 · 390 × 844</p><div class="phone"><iframe src="./index.html" width="390" height="844" title="390 미리보기"></iframe></div></div>
+  <div><p class="cap">iPhone SE · 375 × 812</p><div class="phone" style="width:375px"><iframe src="./index.html?v=20261124c" width="375" height="812" title="375 미리보기"></iframe></div></div>
+  <div><p class="cap">iPhone 15 · 390 × 844</p><div class="phone" style="width:390px"><iframe src="./index.html?v=20261124c" width="390" height="844" title="390 미리보기"></iframe></div></div>
+  <div><p class="cap">iPad 10.2 가로 · 1024 × 768</p><div class="ipad" style="width:1024px"><iframe src="./index.html?v=20261124c" width="1024" height="768" title="아이패드 가로 1024 미리보기"></iframe></div></div>
+  <div><p class="cap">iPad Pro 11 가로 · 1180 × 820</p><div class="ipad" style="width:1180px"><iframe src="./index.html?v=20261124c" width="1180" height="820" title="아이패드 가로 1180 미리보기"></iframe></div></div>
+  <div><p class="cap">iPad 세로 · 820 × 1180</p><div class="ipad" style="width:820px"><iframe src="./index.html?v=20261124c" width="820" height="1180" title="아이패드 세로 미리보기"></iframe></div></div>
 </body>
-<script>
-  // 미리보기 프레임도 같은 캐시 버전을 사용한다
-  (function () {
-    var v = location.search || '';
-    if (!v) return;
-    document.querySelectorAll('iframe').forEach(function (f) { f.src = './index.html' + v; });
-  })();
-</script>
 </html>
