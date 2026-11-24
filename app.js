@@ -182,8 +182,8 @@
     route = { view: 'unit', sid: hit.sub.id, uid, tab: keepTab ? (state.lastTab || 'basic') : 'basic' };
     state.lastUnit = uid; save();
     showView('unit');
-    const tail = hit.unit.title.length > 13 ? hit.unit.title.slice(0, 13) + '…' : hit.unit.title;
-    setHeader(hit.unit.no + ' · ' + tail, hit.sub.name, true);
+    // 글자수로 미리 자르지 않고 CSS 말줄임에 맡긴다(넓은 화면에서는 제목이 다 보이게).
+    setHeader(hit.unit.no + ' · ' + hit.unit.title, hit.sub.name, true);
     renderUnit(hit.sub, hit.unit);
     if (push) history.pushState({ v: 'unit', uid }, '');
   }
