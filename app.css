@@ -108,11 +108,13 @@ html, body {
   html, body { overflow-x: hidden; }
 }
 :root {
-  /* 하단 탭바 높이(세이프에어리어 제외). 본문 여백 계산에 함께 쓴다. */
+  /* 상단 헤더 · 하단 탭바 높이(세이프에어리어 제외). 본문 여백 계산에 함께 쓴다. */
+  --header-h: 54px;
   --nav-h: 56px;
   --nav-clearance: 30px;
 }
 body {
+  padding-top: var(--header-h);
   padding-bottom: calc(var(--nav-h) + var(--nav-clearance) + env(safe-area-inset-bottom, 0px));
 }
 h1, h2, h3, h4, p, ul, ol { margin: 0; }
@@ -124,11 +126,10 @@ button { font-family: inherit; cursor: pointer; }
 /* ---------- layout ---------- */
 .wrap { max-width: 720px; margin: 0 auto; padding: 0 14px; }
 header.app-header {
-  /* iOS 사파리에서 sticky 가 확실히 동작하도록 -webkit-sticky 도 함께 지정하고,
-     backdrop-filter 는 상단에서 검게 그려지는 문제가 있어 불투명 배경으로 대체한다. */
-  position: -webkit-sticky;
-  position: sticky;
-  top: 0; z-index: 40;
+  /* iOS 사파리는 body 의 overflow-x 로 sticky 가 풀리는 경우가 있어,
+     상단 바를 fixed 로 고정하고 높이는 JS 가 --header-h 로 넘긴다. */
+  position: fixed;
+  top: 0; left: 0; right: 0; z-index: 40;
   background: var(--header-bg);
   border-bottom: 1px solid var(--border);
   padding-top: env(safe-area-inset-top, 0px);
@@ -729,6 +730,7 @@ html[data-theme="mono"] .formula { background: var(--tile); }
 /* 인쇄 시 고정 요소 제거 */
 @media print {
   header.app-header { position: static; }
+  body { padding-top: 0; }
   nav.bottom, .toast { display: none !important; }
   body { padding-bottom: 0; }
 }

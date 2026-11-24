@@ -129,6 +129,13 @@
 
   /* ----------------------------- 네비 ----------------------------- */
   let route = { view: 'home' };
+  /* fixed 헤더의 실제 높이(세이프에어리어·소단원 탭줄 포함)를 본문 여백에 반영한다. */
+  function syncHeaderHeight() {
+    const hdr = document.querySelector('header.app-header');
+    if (!hdr) return;
+    const h = Math.round(hdr.getBoundingClientRect().height);
+    if (h > 0) document.documentElement.style.setProperty('--header-h', h + 'px');
+  }
   function setHeader(title, sub, showBack) {
     $('#headerTitle').textContent = title;
     $('#headerSub').textContent = sub || '';    $('#backBtn').hidden = !showBack;
@@ -136,6 +143,7 @@
     const ne = nearestExam();
     $('#headerDday').textContent = ne ? ddayText(ne.s.examISO) : 'D-DAY';
     $$('nav.bottom button[data-nav]').forEach((b) => b.classList.toggle('on', b.dataset.nav === (route.view === 'unit' || route.view === 'subject' ? 'home' : route.view)));
+    syncHeaderHeight();
   }
   function showView(name) {
     ['home', 'subject', 'unit', 'progress'].forEach((v) => {
@@ -963,7 +971,14 @@
     goHome(false);
   });
 
+  /* 헤더 높이 동기화: 회전·리사이즈·폰트 로드 후에도 본문이 가려지지 않게 */
+  window.addEventListener('resize', syncHeaderHeight);
+  window.addEventListener('orientationchange', () => setTimeout(syncHeaderHeight, 150));
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(syncHeaderHeight).catch(() => {});
+  if (window.ResizeObserver) new ResizeObserver(syncHeaderHeight).observe(document.querySelector('header.app-header'));
+
   /* ----------------------------- 부트 ----------------------------- */
+  syncHeaderHeight();
   applyTheme(state.theme || 'light');
   goHome(false);
   if (state.lastSubject && !state.lastUnit) { /* 홈 유지 */ }
