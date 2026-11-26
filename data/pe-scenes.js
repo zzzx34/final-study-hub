@@ -154,7 +154,6 @@
       case 1: /* 서비스할 팀: 팔을 옆으로 뻗음 */
         b += arm(58, 48, 82, 44);
         b += palm(80, 38, 13, 12, 4);
-        b += tx(88, 78, 7, 800, MUT, 'middle', '팀 쪽');
         break;
       case 2: /* 서비스 허가: 손을 서브 방향으로 이동 */
         b += arm(58, 48, 78, 32);
@@ -279,8 +278,25 @@
     return wrap(W, H, b);
   }
 
-  var OWN = { vbCourt: vbCourt, vbRotate: vbRotate, vbSignal: vbSignal, vbSignalGrid: vbSignalGrid };
-  var TAGS = { vbCourt: '코트 도식', vbRotate: '로테이션', vbSignal: '시그널', vbSignalGrid: '시그널 표' };
+  /* -------- 5. 표 (HUB_UI.scenes 전용: 앱의 .cmp 표 스타일을 그대로 쓴다) -------- */
+  function inline(s) {
+    return esc(s).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+  }
+  function vbTable(s) {
+    var cols = s.cols || [], rows = s.rows || [];
+    var head = '<thead><tr>' + cols.map(function (c, i) {
+      return '<th' + (i === 0 ? ' style="min-width:64px"' : '') + '>' + inline(c) + '</th>';
+    }).join('') + '</tr></thead>';
+    var body = rows.map(function (r) {
+      return '<tr>' + r.map(function (c, i) {
+        return i === 0 ? '<th>' + inline(c) + '</th>' : '<td>' + inline(c) + '</td>';
+      }).join('') + '</tr>';
+    }).join('');
+    return '<div class="cmp-wrap"><table class="cmp">' + head + '<tbody>' + body + '</tbody></table></div>';
+  }
+
+  var OWN = { vbCourt: vbCourt, vbRotate: vbRotate, vbSignal: vbSignal, vbSignalGrid: vbSignalGrid, vbTable: vbTable };
+  var TAGS = { vbCourt: '코트 도식', vbRotate: '로테이션', vbSignal: '시그널', vbSignalGrid: '시그널 표', vbTable: '정리 표' };
 
   window.HUB_SCENE = {
     render: function (s) {

@@ -286,7 +286,7 @@
             <span class="pill" style="background:${sub.color};border-color:${sub.color};color:#fff">${ddayText(sub.examISO)}</span>
           </div>
           <h1 style="font-size:18px;font-weight:900;margin-top:8px;letter-spacing:-.02em">${sub.emoji || ''} ${esc(sub.name)}</h1>
-          <div class="small muted" style="margin-top:3px">시험일 ${esc(sub.examLabel)} · ${st.total}개 소단원</div>
+          <div class="small muted" style="margin-top:3px">${sub.examISO ? '시험일 ' + esc(sub.examLabel) : esc(sub.examLabel)} · ${st.total}개 소단원</div>
         </div>
       </div>
       <div class="bar" style="margin-top:12px"><i style="width:${st.pct}%;background:${sub.color}"></i></div>
@@ -1071,7 +1071,7 @@
           MEMO.flip = false;
           const rest = memoIdx(u, memo);
           const pos = rest.indexOf(idx);
-          MEMO.i = pos >= 0 ? pos : Math.min(MEMO.i, Math.max(0, rest.length - 1));
+          MEMO.i = pos < 0 ? Math.min(MEMO.i, Math.max(0, rest.length - 1)) : (pos + 1) % rest.length;
         }
         refreshMemo();
       }
