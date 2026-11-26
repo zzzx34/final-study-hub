@@ -737,3 +737,58 @@ html[data-theme="mono"] .formula { background: var(--tile); }
 
 /* 기적패스 자료 출처 표기 */
 .src-note{display:inline-flex;align-items:center;gap:4px;margin-top:7px;padding:3px 8px;border-radius:999px;background:var(--tile);border:1px solid var(--border);font-weight:800;letter-spacing:-.01em}
+
+/* ==========================================================================
+   암기 모드 (플래시카드 · 빈칸 가리기 · 자가 체크)
+   ========================================================================== */
+.tabbar.has-memo { grid-template-columns: repeat(5, 1fr); }
+.tabbar.has-memo button { font-size: 10px; letter-spacing: -0.03em; padding: 7px 0; }
+@media (min-width: 640px) {
+  .tabbar.has-memo button { font-size: 11px; letter-spacing: -0.02em; }
+}
+.memo-head { border: 1px solid var(--border); border-radius: 16px; background: var(--card); padding: 11px 12px; margin-bottom: 9px; }
+.seg { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; border-radius: 13px; background: var(--seg-bg); margin-bottom: 10px; }
+.seg button {
+  border: 0; background: transparent; color: var(--sub); font-size: 11.5px; font-weight: 900;
+  padding: 9px 6px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+}
+.seg button span { font-size: 9.5px; font-weight: 900; background: var(--bg); border-radius: 999px; padding: 0 5px; color: var(--muted); }
+.seg button.on { background: var(--seg-active); color: var(--accent-text); box-shadow: var(--shadow); }
+.seg button.on span { background: var(--accent-soft); color: var(--accent-text); }
+html[data-theme="mono"] .seg button.on { background: #09090b; color: #fff; }
+html[data-theme="mono"] .seg button.on span { background: #e4e4e7; color: #09090b; }
+
+.fc-count { margin: 2px 2px 6px; font-weight: 800; }
+.flashcard {
+  display: grid; gap: 10px; width: 100%; min-height: 192px; text-align: left; align-content: start;
+  border: 1px solid var(--border); border-radius: 18px; background: var(--card);
+  box-shadow: var(--shadow); padding: 14px; color: var(--text);
+}
+.flashcard:active { transform: scale(.995); }
+.flashcard .fc-meta {
+  font-size: 9.5px; font-weight: 900; color: var(--accent-text); background: var(--accent-soft);
+  border: 1px solid var(--border); border-radius: 999px; padding: 2px 7px; justify-self: start;
+}
+.flashcard .fc-face { display: grid; gap: 8px; }
+.flashcard .fc-back { display: none; }
+.flashcard.on .fc-front { display: none; }
+.flashcard.on .fc-back { display: grid; }
+.flashcard .fc-q { font-size: 15px; font-weight: 900; line-height: 1.45; letter-spacing: -0.02em; }
+.flashcard .fc-a { font-size: 13px; font-weight: 700; line-height: 1.7; color: var(--sub); }
+.flashcard .fc-glyph { max-width: 132px; }
+.flashcard .fc-hint {
+  font-size: 10px; font-weight: 800; color: var(--muted); margin-top: auto;
+  padding-top: 6px; border-top: 1px dashed var(--border);
+}
+.cloze-list { display: grid; gap: 8px; }
+.cloze-item {
+  display: block; width: 100%; text-align: left; border: 1px solid var(--border); border-radius: 13px;
+  background: var(--card); padding: 11px 12px; font-size: 12.5px; font-weight: 700; line-height: 1.8; color: var(--text);
+}
+.cloze-item:active { background: var(--tile); }
+.cloze-item .cz-b {
+  color: transparent; background: var(--seg-bg); border-radius: 5px; padding: 0 4px;
+  transition: color .15s ease, background .15s ease;
+}
+.cloze-item.open .cz-b { color: var(--accent-text); background: var(--accent-soft); }
+html[data-theme="mono"] .cloze-item.open .cz-b { background: #e4e4e7; color: #09090b; }

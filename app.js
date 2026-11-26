@@ -12,7 +12,7 @@
   const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
 
   /* ----------------------------- 상태 ----------------------------- */
-  const defaultState = { theme: 'light', done: {}, quiz: {}, wrong: {}, lastUnit: null, lastSubject: null, lastTab: 'basic' };
+  const defaultState = { theme: 'light', done: {}, quiz: {}, wrong: {}, memo: {}, lastUnit: null, lastSubject: null, lastTab: 'basic' };
   let state = load();
   function load() {
     try {
@@ -20,7 +20,7 @@
       if (!raw) return Object.assign({}, defaultState);
       const p = JSON.parse(raw);
       return Object.assign({}, defaultState, p, {
-        done: p.done || {}, quiz: p.quiz || {}, wrong: p.wrong || {}
+        done: p.done || {}, quiz: p.quiz || {}, wrong: p.wrong || {}, memo: p.memo || {}
       });
     } catch (e) { return Object.assign({}, defaultState); }
   }
@@ -56,6 +56,7 @@
     return Math.round((new Date(d.getFullYear(), d.getMonth(), d.getDate()) - t) / 86400000);
   }
   function ddayText(iso) {
+    if (!iso) return '암기';
     const n = daysUntil(iso);
     if (n > 0) return 'D-' + n;
     if (n === 0) return 'D-DAY';
@@ -155,7 +156,7 @@
   function goHome(push) {
     route = { view: 'home' };
     showView('home');
-    setHeader('기말 학습 허브', '4과목 · ' + ALL_UNITS.length + '개 소단원', false);
+    setHeader('기말 학습 허브', SUBJECTS.length + '과목 · ' + ALL_UNITS.length + '개 단원', false);
     renderHome();
     if (push) history.pushState({ v: 'home' }, '');
   }
@@ -179,7 +180,8 @@
   function goUnit(uid, push, keepTab) {
     const hit = findUnit(uid);
     if (!hit) return goHome();
-    route = { view: 'unit', sid: hit.sub.id, uid, tab: keepTab ? (state.lastTab || 'basic') : 'basic' };
+    const entry = keepTab ? (state.lastTab || 'basic') : (memoOf(hit.unit) ? 'memo' : 'basic');
+    route = { view: 'unit', sid: hit.sub.id, uid, tab: (entry === 'memo' && !memoOf(hit.unit)) ? 'basic' : entry };
     state.lastUnit = uid; save();
     showView('unit');
     // 글자수로 미리 자르지 않고 CSS 말줄임에 맡긴다(넓은 화면에서는 제목이 다 보이게).
@@ -189,10 +191,12 @@
   }
   function setTab(tab) {
     if (route.view !== 'unit') return;
+    const cur = findUnit(route.uid);
+    if (tab === 'memo' && !(cur && memoOf(cur.unit))) tab = 'basic';
     route.tab = tab;
     state.lastTab = tab; save();
     $$('#unitTabs button').forEach((b) => b.classList.toggle('on', b.dataset.tab === tab));
-    ['basic', 'visual', 'deep', 'quiz'].forEach((t) => $('#tab-' + t).classList.toggle('hidden', t !== tab));
+    ['basic', 'visual', 'deep', 'memo', 'quiz'].forEach((t) => $('#tab-' + t).classList.toggle('hidden', t !== tab));
     $('#unitHead').classList.toggle('compact', tab !== 'basic');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -296,10 +300,11 @@
     $('#subjectUnitCount').textContent = st.total + '개 · ' + ddayText(sub.examISO);
     $('#unitList').innerHTML = sub.units.map((u, i) => {
       const q = state.quiz[u.id];
+      const mm = memoOf(u);
       return `<button type="button" class="unit-row" data-unit="${u.id}">
         <span class="unit-no" style="color:${sub.color}">${esc(u.no)}</span>
-        <span class="unit-name">${esc(u.title)}
-          <span class="tiny muted" style="display:block;font-weight:700;margin-top:2px">${esc((u.terms && u.terms[0] && u.terms[0].t) || '')}${q ? ' · 퀴즈 ' + q.correct + '/' + q.total : ''}</span>
+        <span class="unit-name">${u.testOnly ? '🧠 ' : ''}${esc(u.title)}
+          <span class="tiny muted" style="display:block;font-weight:700;margin-top:2px">${esc((u.terms && u.terms[0] && u.terms[0].t) || '')}${mm ? ' · 암기 ' + ((mm.cards || []).length) + '장' : ''}${q ? ' · 퀴즈 ' + q.correct + '/' + q.total : ''}</span>
         </span>
         <span class="unit-check ${isDone(u.id) ? 'done' : ''}">✓</span>
       </button>`;
@@ -394,8 +399,21 @@
     // 퀴즈
     $('#tab-quiz').innerHTML = renderQuiz(u);
 
+    // 암기 모드 (플래시카드 + 빈칸)
+    const memoD = memoOf(u);
+    const memoBtn = $('#unitTabs button[data-tab="memo"]');
+    if (memoBtn) memoBtn.hidden = !memoD;
+    const tabsBox = $('#unitTabs');
+    if (tabsBox) tabsBox.classList.toggle('has-memo', !!memoD);
+    if (MEMO.uid !== u.id) {
+      MEMO.uid = u.id; MEMO.i = 0; MEMO.flip = false; MEMO.filter = 'all'; MEMO.pane = 'card';
+    }
+    MEMO.sub = sub; MEMO.u = u;
+    $('#tab-memo').innerHTML = memoD ? renderMemo(sub, u, memoD) : '';
+    if (route.tab === 'memo' && !memoD) route.tab = 'basic';
+
     $$('#unitTabs button').forEach((b) => b.classList.toggle('on', b.dataset.tab === (route.tab || 'basic')));
-    ['basic', 'visual', 'deep', 'quiz'].forEach((t) => $('#tab-' + t).classList.toggle('hidden', t !== (route.tab || 'basic')));
+    ['basic', 'visual', 'deep', 'memo', 'quiz'].forEach((t) => $('#tab-' + t).classList.toggle('hidden', t !== (route.tab || 'basic')));
     $('#unitHead').classList.toggle('compact', (route.tab || 'basic') !== 'basic');
 
     // 이전/다음
@@ -880,6 +898,118 @@
     drawCards();
   }
 
+  /* ----------------------------- 암기 모드 ----------------------------- */
+  const MEMO = { uid: null, sub: null, u: null, i: 0, flip: false, pane: 'card', filter: 'all' };
+
+  function memoOf(u) {
+    if (!u) return null;
+    if (u.memo) return u.memo;
+    return (window.HUB_MEMO && window.HUB_MEMO[u.id]) || null;
+  }
+  function memoStateOf(uid) {
+    if (!state.memo) state.memo = {};
+    const m = state.memo[uid] || (state.memo[uid] = {});
+    if (!m.known) m.known = {};
+    if (!m.unsure) m.unsure = {};
+    return m;
+  }
+  function memoIdx(u, memo) {
+    const all = memo.cards || [];
+    const ms = memoStateOf(u.id);
+    const out = [];
+    all.forEach((c, i) => {
+      if (MEMO.filter === 'todo' && ms.known[i]) return;
+      if (MEMO.filter === 'unsure' && !ms.unsure[i]) return;
+      out.push(i);
+    });
+    return out;
+  }
+  // [[정답]] 표기를 탭하면 열리는 빈칸으로 바꾼다.
+  function clozeHTML(text) {
+    return String(text).split(/(\[\[.+?\]\])/g).map((seg) => {
+      const m = seg.match(/^\[\[(.+?)\]\]$/);
+      return m ? '<b class="cz-b">' + fmt(m[1]) + '</b>' : fmt(seg);
+    }).join('');
+  }
+  function renderMemo(sub, u, memo) {
+    const cards = memo.cards || [];
+    const cloze = memo.cloze || [];
+    const ms = memoStateOf(u.id);
+    const known = cards.filter((c, i) => ms.known[i]).length;
+    const unsure = cards.filter((c, i) => ms.unsure[i]).length;
+    const pct = cards.length ? Math.round((known / cards.length) * 100) : 0;
+    const head = `<div class="memo-head">
+      <div class="row" style="justify-content:space-between;align-items:flex-start">
+        <div>
+          <div class="small strong">🧠 암기 모드</div>
+          <div class="tiny muted" style="margin-top:2px">탭해서 정답 확인 · 외운 카드 <b style="color:var(--text)">${known}</b>/${cards.length}${unsure ? ' · 헷갈림 ' + unsure : ''}</div>
+        </div>
+        <button type="button" class="btn" style="padding:5px 9px;font-size:10.5px" data-memo-reset>기록 초기화</button>
+      </div>
+      <div class="bar" style="margin-top:8px"><i style="width:${pct}%;background:var(--ok)"></i></div>
+    </div>`;
+    const panes = `<div class="seg" id="memoPanes">
+      <button type="button" data-pane="card" class="${MEMO.pane === 'card' ? 'on' : ''}">🃏 플래시카드<span>${cards.length}</span></button>
+      <button type="button" data-pane="cloze" class="${MEMO.pane === 'cloze' ? 'on' : ''}">✏️ 빈칸 채우기<span>${cloze.length}</span></button>
+    </div>`;
+    return head + panes + (MEMO.pane === 'cloze' ? memoClozeHTML(memo) : memoDeckHTML(u, memo));
+  }
+
+  function memoDeckHTML(u, memo) {
+    const all = memo.cards || [];
+    if (!all.length) return '<div class="empty">플래시카드 준비 중</div>';
+    const ms = memoStateOf(u.id);
+    const todoN = all.filter((c, i) => !ms.known[i]).length;
+    const unsureN = all.filter((c, i) => ms.unsure[i]).length;
+    const filters = `<div class="filters" id="memoFilters">
+      ${[['all', '전체', all.length], ['todo', '아직 안 외운', todoN], ['unsure', '헷갈린 카드', unsureN]].map((x) =>
+        `<button type="button" class="fchip ${MEMO.filter === x[0] ? 'on' : ''}" data-mfilter="${x[0]}">${x[1]}<span class="fc-n">${x[2]}</span></button>`).join('')}
+    </div>`;
+    const idxs = memoIdx(u, memo);
+    if (!idxs.length) return filters + '<div class="empty">이 조건에 맞는 카드가 없어요. 다른 필터를 골라 보세요.</div>';
+    if (MEMO.i >= idxs.length) MEMO.i = 0;
+    const idx = idxs[MEMO.i];
+    const c = all[idx] || {};
+    const glyph = c.g && window.HUB_SCENE ? window.HUB_SCENE.render({ type: 'vbSignal', n: c.g }) : '';
+    const flag = ms.known[idx] ? '✅ 외웠음' : (ms.unsure[idx] ? '⚠️ 헷갈림' : '');
+    return filters + `<div class="fc-count tiny muted">${MEMO.i + 1} / ${idxs.length}${flag ? ' · ' + flag : ''}</div>
+      <button type="button" class="flashcard ${MEMO.flip ? 'on' : ''}" id="memoCard">
+        <span class="fc-meta">${esc(c.tag || '')}</span>
+        <span class="fc-face fc-front">
+          ${glyph ? '<span class="fc-glyph">' + glyph + '</span>' : ''}
+          <span class="fc-q">${fmt(c.f || '')}</span>
+        </span>
+        <span class="fc-face fc-back"><span class="fc-a">${fmt(c.b || '')}</span></span>
+        <span class="fc-hint">${MEMO.flip ? '정답 · 탭하면 문제로 돌아갑니다' : '탭하면 정답이 보입니다'}</span>
+      </button>
+      <div class="row" style="gap:7px;margin-top:8px">
+        <button type="button" class="btn grow" data-fc="prev">← 이전</button>
+        <button type="button" class="btn grow" data-fc="flip">뒤집기</button>
+        <button type="button" class="btn grow" data-fc="next">다음 →</button>
+      </div>
+      <div class="row" style="gap:7px;margin-top:7px">
+        <button type="button" class="btn btn-ok grow" data-fc="known">✅ 외웠음</button>
+        <button type="button" class="btn grow" data-fc="unsure" style="color:var(--warn);border-color:color-mix(in srgb, var(--warn) 45%, var(--border))">⚠️ 헷갈림</button>
+      </div>`;
+  }
+
+  function memoClozeHTML(memo) {
+    const list = memo.cloze || [];
+    if (!list.length) return '<div class="empty">빈칸 문제 준비 중</div>';
+    return `<div class="row" style="justify-content:space-between;margin:2px 0 8px">
+        <span class="tiny muted strong">문장을 탭하면 빈칸이 열립니다</span>
+        <button type="button" class="btn" style="padding:5px 9px;font-size:10.5px" data-cz-all>전체 보이기</button>
+      </div>
+      <div class="cloze-list">${list.map((t, i) =>
+        `<button type="button" class="cloze-item" data-cz="${i}">${clozeHTML(t)}</button>`).join('')}</div>`;
+  }
+
+  function refreshMemo() {
+    const pane = $('#tab-memo');
+    if (!pane || !MEMO.u) return;
+    pane.innerHTML = renderMemo(MEMO.sub, MEMO.u, memoOf(MEMO.u) || {});
+  }
+
   /* ----------------------------- 진도 화면 ----------------------------- */
   function renderProgress() {
     const o = overallStats();
@@ -918,6 +1048,53 @@
 
   /* ----------------------------- 이벤트 ----------------------------- */
   document.addEventListener('click', (e) => {
+    const paneBtn = e.target.closest('[data-pane]');
+    if (paneBtn) { MEMO.pane = paneBtn.dataset.pane; refreshMemo(); return; }
+    const mfBtn = e.target.closest('[data-mfilter]');
+    if (mfBtn) { MEMO.filter = mfBtn.dataset.mfilter; MEMO.i = 0; MEMO.flip = false; refreshMemo(); return; }
+    if (e.target.closest('#memoCard')) { MEMO.flip = !MEMO.flip; refreshMemo(); return; }
+    const fcb = e.target.closest('[data-fc]');
+    if (fcb) {
+      const u = MEMO.u, memo = memoOf(u);
+      if (u && memo) {
+        const idxs = memoIdx(u, memo);
+        const idx = idxs[MEMO.i];
+        const ms = memoStateOf(u.id);
+        const act = fcb.dataset.fc;
+        if (act === 'flip') MEMO.flip = !MEMO.flip;
+        else if (act === 'next') { MEMO.i = (MEMO.i + 1) % idxs.length; MEMO.flip = false; }
+        else if (act === 'prev') { MEMO.i = (MEMO.i - 1 + idxs.length) % idxs.length; MEMO.flip = false; }
+        else if (act === 'known' || act === 'unsure') {
+          if (act === 'known') { ms.known[idx] = Date.now(); delete ms.unsure[idx]; toast('외운 카드로 표시했어요'); }
+          else { ms.unsure[idx] = Date.now(); delete ms.known[idx]; }
+          save();
+          MEMO.flip = false;
+          const rest = memoIdx(u, memo);
+          const pos = rest.indexOf(idx);
+          MEMO.i = pos >= 0 ? pos : Math.min(MEMO.i, Math.max(0, rest.length - 1));
+        }
+        refreshMemo();
+      }
+      return;
+    }
+    const czBtn = e.target.closest('[data-cz]');
+    if (czBtn) { czBtn.classList.toggle('open'); return; }
+    const czAll = e.target.closest('[data-cz-all]');
+    if (czAll) {
+      const items = $$('#tab-memo .cloze-item');
+      const toOpen = items.some((x) => !x.classList.contains('open'));
+      items.forEach((x) => x.classList.toggle('open', toOpen));
+      czAll.textContent = toOpen ? '전체 가리기' : '전체 보이기';
+      return;
+    }
+    const mReset = e.target.closest('[data-memo-reset]');
+    if (mReset) {
+      if (!MEMO.u) return;
+      if (!confirm('이 단원의 암기 기록(외웠음·헷갈림)을 지울까요?')) return;
+      state.memo[MEMO.u.id] = { known: {}, unsure: {} };
+      save(); refreshMemo(); toast('암기 기록을 초기화했어요');
+      return;
+    }
     const key = e.target.closest('[data-kx]');
     if (key) { if (e.target.closest('.k-more')) return; key.classList.toggle('open'); return; }
     const dcm = e.target.closest('[data-dc]');
@@ -961,7 +1138,7 @@
   }));
   $('#resetBtn').addEventListener('click', () => {
     if (!confirm('학습 완료 체크와 퀴즈 기록을 모두 지울까요? (되돌릴 수 없습니다)')) return;
-    state.done = {}; state.quiz = {}; save(); renderProgress(); toast('진도를 초기화했습니다');
+    state.done = {}; state.quiz = {}; state.memo = {}; save(); renderProgress(); toast('진도를 초기화했습니다');
   });
   window.addEventListener('popstate', () => {
     // 해시 없는 히스토리: 간단히 홈으로 복귀 (앱 내 내비게이션 유지)
