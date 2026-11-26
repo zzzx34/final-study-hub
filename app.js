@@ -180,7 +180,7 @@
   function goUnit(uid, push, keepTab) {
     const hit = findUnit(uid);
     if (!hit) return goHome();
-    const entry = keepTab ? (state.lastTab || 'basic') : (memoOf(hit.unit) ? 'memo' : 'basic');
+    const entry = keepTab ? (state.lastTab || 'basic') : (hit.sub.id === 'pe' && memoOf(hit.unit) ? 'memo' : 'basic');
     route = { view: 'unit', sid: hit.sub.id, uid, tab: (entry === 'memo' && !memoOf(hit.unit)) ? 'basic' : entry };
     state.lastUnit = uid; save();
     showView('unit');
